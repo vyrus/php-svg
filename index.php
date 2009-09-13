@@ -49,21 +49,16 @@
             return $elem;
         }
         
-        public function __get($name) {
-            if (!isset($this->_elements[$name]))
-            {
-                $elem = new SVG_Element($name);
-                $this->_elements[] = $elem;
-                
-                return $elem;
-            }
-            
-            return $this->_elements[$name];
-        }
-        
         public function attr($name, $value) {
             $this->_attributes[$name] = $value;
             return $this;
+        }
+        
+        public function __get($name) {
+            $elem = new SVG_Element($this, $name);
+            $this->_elements[] = $elem;
+                
+            return $elem;
         }
         
         public function __call($name, $arguments) {
@@ -103,10 +98,17 @@
     }
     
     class SVG_Element extends SVG_Abstract {
+        protected $_parent;
+        
         protected $_tag;
         
-        public function __construct($tag) {
+        public function __construct(SVG_Abstract $parent, $tag) {
+            $this->_parent = $parent;
             $this->_tag = $tag;
+        }
+        
+        public function parent() {
+            return $this->_parent;
         }
         
         public function render($indent_level) {
@@ -126,7 +128,38 @@
             ->fill('none')
             ->stroke('black')
             ->attr('stroke-width', '5px')
-            ->attr('stroke-opacity', 0.5);
+            ->attr('stroke-opacity', 0.5)
+            ->parent()
+            
+        ->g
+            ->attr('fill-opacity', 0.7)
+            ->stroke('black')
+            ->attr('stroke-width', '0.5px')
+                
+                ->circle
+                    ->cx('200px')
+                    ->cy('200px')
+                    ->r('100px')
+                    ->fill('red')
+                    ->transform('translate(0,-50)')
+                    ->parent()
+                
+                ->circle
+                    ->cx('200px')
+                    ->cy('200px')
+                    ->r('100px')
+                    ->fill('blue')
+                    ->transform('translate(70, 50)')
+                    ->parent()
+                
+                ->circle
+                    ->cx('200px')
+                    ->cy('200px')
+                    ->r('100px')
+                    ->fill('green')
+                    ->transform('translate(-70, 50)')
+                    ->parent()
+    ;
     
     $svg->render('./gen-test.svg');
 
